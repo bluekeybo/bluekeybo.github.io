@@ -1,0 +1,499 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Language" content="en-us">
+      <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+      <meta name="KEYWORDS" content="signals, systems, sine, cosine">
+      <meta name="DESCRIPTION" content="This is an introduction to signals">
+      <link href="examples.css" rel="stylesheet" type="text/css">
+      <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
+      <script language="javascript" type="text/javascript" src="jquery.js"></script>
+      <script language="javascript" type="text/javascript" src="jquery.flot.js"></script>
+      <script type="text/javascript"
+         src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript">
+         $(function() {
+         
+         	var sin = [];
+         
+         	for (var i = 0; i < 14; i += 0.001) {
+         		sin.push([i, Math.pow(Math.sin(i),2)]);
+         	}
+         
+         	var plot = $.plot("#placeholder", [
+         		{ data: sin, label: "x<sup>2</sup>(t) = sin<sup>2</sup>(t)"}
+         	], {
+         		series: {
+         			lines: {
+         				show: true, fill: true
+         			}
+         		},
+         		grid: {
+         			hoverable: true
+         		}			
+         	});
+         
+         	$("<div id='tooltip'></div>").css({
+         		position: "absolute",
+         		display: "none",
+         		border: "1px solid #fdd",
+         		padding: "2px",
+         		"background-color": "#fee",
+         		opacity: 0.80
+         	}).appendTo("body");
+         
+         	$("#placeholder").bind("plothover", function (event, pos, item) {
+         		
+         			if (item) {
+         				var x = item.datapoint[0].toFixed(2),
+         					y = item.datapoint[1].toFixed(2);
+         					z = 0.5*(x-Math.sin(x)*Math.cos(x)).toFixed(2);
+         
+         				$("#tooltip").html("Energy = " + z)
+         					.css({top: item.pageY+5, left: item.pageX+5})
+         					.fadeIn(200);			
+         			
+         		}
+         	});
+         
+         	;
+         
+         	// Add the Flot version string to the footer
+         
+         	$("#footer").prepend("Flot " + $.plot.version + " &ndash; ");
+         });
+         
+      </script>
+      <script type="text/javascript">
+         $(function() {
+         
+         	var sin = [];
+         
+         	for (var i = 0; i < 14; i += 0.5) {
+         		sin.push([i, Math.sin(i)]);
+         	}
+         
+         	var plot = $.plot("#placeholder2", [
+         		{ data: sin, label: "sin(t)"}
+         	], {
+         		series: {
+         			
+         			points: {
+         				show: true
+         				}
+         		},
+         		grid: {
+         			hoverable: true
+         		}			
+         	});
+         
+         	$("<div id='tooltip'></div>").css({
+         		position: "absolute",
+         		display: "none",
+         		border: "1px solid #fdd",
+         		padding: "2px",
+         		"background-color": "#fee",
+         		opacity: 0.80
+         	}).appendTo("body");
+         
+         	$("#placeholder2").bind("plothover", function (event, pos, item) {
+         		
+         			if (item) {
+         				var x = item.datapoint[0].toFixed(1),
+         					y = item.datapoint[1].toFixed(2);
+         					z = 0.5*(x-Math.sin(x)*Math.cos(x)).toFixed(2);
+         
+         				$("#tooltip").html("sin(" + x + ") = " + y)
+         					.css({top: item.pageY+5, left: item.pageX+5})
+         					.fadeIn(200);			
+         			
+         		}
+         	});
+         
+         	;
+         
+         	// Add the Flot version string to the footer
+         
+         	$("#footer2").prepend("Flot " + $.plot.version + " &ndash; ");
+         });
+         
+      </script>
+      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
+      <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+      <title>Signals and Systems</title>
+      <style>
+         p.ex {    
+         margin-right: 0px;
+         margin-left: 0px;
+         }
+         p {    
+         margin-right: 10px;
+         margin-left: 10px;
+         }
+         #content {
+         width:95%;
+         }
+         .MathJax_Display { 
+         text-align: center !important;
+         display: inline !important;
+         }
+         body{margin:0px;}
+         svg {
+         //border:solid 1px #666;
+         overflow:hidden;
+         }
+         path {
+         fill:yellow;
+         stroke:#000;
+         stroke-width:.5px;
+         }
+         circle {
+         fill:#ccc;
+         stroke:#000;
+         pointer-events:none;
+         }
+         #button {position:absolute;top:10px;left:400px;}
+         #title {position:absolute;top:12px;left:0px;width:500px;text-align:center;}
+         .btn { display:inline-block;*display:inline;/* IE7 inline-block hack */ *zoom:1;padding:4px 10px 4px;margin-bottom:0;font-size:13px;line-height:18px;color:#333333;text-align:center;text-shadow:0 1px 1px rgba(255,255,255,0.75);vertical-align:middle;background-color:#f5f5f5;background-image:-moz-linear-gradient(top,#ffffff,#e6e6e6);background-image:-ms-linear-gradient(top,#ffffff,#e6e6e6);background-image:-webkit-gradient(linear,0 0,0 100%,from(#ffffff),to(#e6e6e6));background-image:-webkit-linear-gradient(top,#ffffff,#e6e6e6);background-image:-o-linear-gradient(top,#ffffff,#e6e6e6);background-image:linear-gradient(top,#ffffff,#e6e6e6);background-repeat:repeat-x;filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff',endColorstr='#e6e6e6',GradientType=0);border-color:#e6e6e6 #e6e6e6 #bfbfbf;border-color:rgba(0,0,0,0.1) rgba(0,0,0,0.1) rgba(0,0,0,0.25);filter:progid:dximagetransform.microsoft.gradient(enabled=false);border:1px solid #cccccc;border-bottom-color:#b3b3b3;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;-webkit-box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 1px 2px rgba(0,0,0,0.05);-moz-box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 1px 2px rgba(0,0,0,0.05);box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 1px 2px rgba(0,0,0,0.05);cursor:pointer;*margin-left:.3em;} .btn:hover,.btn:active,.btn.active,.btn.disabled,.btn[disabled] { background-color:#e6e6e6;} .btn:active,.btn.active { background-color:#cccccc \9;} .btn:first-child { *margin-left:0;} .btn:hover { color:#333333;text-decoration:none;background-color:#e6e6e6;background-position:0 -15px;-webkit-transition:background-position 0.1s linear;-moz-transition:background-position 0.1s linear;-ms-transition:background-position 0.1s linear;-o-transition:background-position 0.1s linear;transition:background-position 0.1s linear;} .btn:focus { outline:thin dotted #333;outline:5px auto -webkit-focus-ring-color;outline-offset:-2px;} .btn.active,.btn:active { background-image:none;-webkit-box-shadow:inset 0 2px 4px rgba(0,0,0,0.15),0 1px 2px rgba(0,0,0,0.05);-moz-box-shadow:inset 0 2px 4px rgba(0,0,0,0.15),0 1px 2px rgba(0,0,0,0.05);box-shadow:inset 0 2px 4px rgba(0,0,0,0.15),0 1px 2px rgba(0,0,0,0.05);background-color:#e6e6e6;background-color:#d9d9d9 \9;outline:0;} .btn.disabled,.btn[disabled] { cursor:default;background-image:none;background-color:#e6e6e6;opacity:0.65;filter:alpha(opacity=65);-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;} .btn-mini { padding:2px 6px;font-size:11px;line-height:14px;}
+         }
+         svg {border:1px solid black;}
+         }
+      </style>
+      <script Language="JavaScript">
+         var RightAnswer1, UserAnswer1;
+         var checkAnswer1 = "Try Again";
+         
+         function evaluateAnswer1(form, RightAnswer1){
+         	UserAnswer1 = eval(form.Input1.value);
+         	if (RightAnswer1 == UserAnswer1)
+         	{
+         	checkAnswer1 = "Correct!";
+         		}
+             else checkAnswer1 = "Try Again";
+         	
+         	form.Answer.value=checkAnswer1;	
+         }
+         
+         
+      </script>
+      <script Language="JavaScript">
+         var RightAnswer, UserAnswer;
+         var checkAnswer = "Try Again";
+         
+         function evaluateAnswer2(form, RightAnswer){
+         	UserAnswer = eval(form.Input2.value);
+         	if (RightAnswer == UserAnswer)
+         	{
+         	checkAnswer = "Correct!";
+         		}
+             else checkAnswer = "Try Again";
+         	
+         	form.Answer2.value=checkAnswer;	
+         }
+         
+         
+      </script>
+      <script Language="JavaScript">
+         var RightAnswer, UserAnswer;
+         var checkAnswer = "Try Again";
+         
+         function evaluateAnswer3(form, RightAnswer){
+         	UserAnswer = eval(form.Input3.value);
+         	if (RightAnswer == UserAnswer)
+         	{
+         	checkAnswer = "Correct!";
+         		}
+             else checkAnswer = "Try Again";
+         	
+         	form.Answer3.value=checkAnswer;	
+         }
+         
+         
+      </script>
+   </head>
+   <body bgcolor="#F6CA8F">
+      <div align="center">
+         <center>
+            <table id = "content" border="1" cellpadding="3" cellspacing="1" height="76">
+               <tr>
+                  <td width="786" valign="top" align="center" bgcolor="#EC931A" height="66"><font size="7" face="Arial" color="#2D1C04">An Introduction
+                     to Signals</font>
+                  </td>
+               </tr>
+            </table>
+         </center>
+      </div>
+      <center><b></b>
+      </center>
+      <div align="center">
+         <center>
+            <table id = "content" border="0" cellpadding="3" cellspacing="1" height="581">
+               <tr>
+                  <td width="748" colspan="3" align="center" height="19" bgcolor="#EFA541"><b>
+                     </b>
+                  </td>
+               </tr>
+               <tr>
+                  <td width="44" height="524" valign="top" align="center">
+                     <div align="center">
+                        <table border="0" cellpadding="3" cellspacing="1" width="137">
+                           <tr>
+                              <td width="124" bgcolor="#2D1C04">
+                                 <p align="center"><font color="#FFFFFF"><b>Links</b></font>
+                              </td>
+                           </tr>
+                           <tr>
+                              <td width="124" bgcolor="#F9DDB6"><a href="#Definition">Signal Definition</a></td>
+                           </tr>
+                           <tr>
+                              <td width="124" bgcolor="#F9DDB6"><a href="#Sinusoidal Signals">Sinusoidal Signals</a></td>
+                           </tr>
+                           <tr>
+                              <td width="124" bgcolor="#F9DDB6"><a href="#Signal Transformations">Transformations</a></td>
+                           </tr>
+                           <tr>
+                              <td width="124" bgcolor="#F9DDB6">
+                                 <a href="#Signal Energy">
+                                    Signal Energy
+                              </td>
+                           </tr>
+                           <tr>
+                           <td width="124" bgcolor="#F9DDB6"><a href="#Fourier Series">Fourier Series</td>
+                           </tr>
+                           <tr>
+                           <td width="124" bgcolor="#F9DDB6"><a href="#Signal Sampling">Signal Sampling</td>
+                           </tr>
+                           <tr>
+                           <td width="124" bgcolor="#F9DDB6"><a href="#References">References</td>
+                           </tr>
+                        </table>
+                     </div>
+                     <div align="center">
+                     <table border="0" cellpadding="0" cellspacing="1" width="136" height="107">
+                     <tr>
+                     <td width="123" bgcolor="#FFFFFF" height="97">
+                     <p class="ex" align="center"><b><a href="index.html"> 
+                     <img src="image_Signals.jpg" align="center" height="107" width="136"/> </b>
+                     </td>
+                     </tr>
+                     </table>
+                     </div>
+                  </td>
+                  <td width="654" height="524" valign="top" bgcolor="#FCEFDE">
+                  <a name="Definition"></a>
+                  <p align="center"><b><font face="Arial" size="5">What is a Signal?</font></b>
+                  </p>
+         </center>
+         <p align="justify">     <font size="3"><font face="Arial">A signal is a set of data or information. In general, signals are functions of the independent
+         variable time. This is not always the case, however. When an electrical charge is distributed over a body, for instance, the signal is the
+         charge density, a function of space rather than time. The term "signal" includes, among others, audio, video, speech, image, communication, 
+         geophysical, sonar, radar, medical and musical signals.</font></font></p>
+         <p align="justify">     <font size="3"><font face="Arial">Some examples of signals are: a telephone or a television signal, monthly sales of a corporation, or daily
+         closing prices of a stock market (e.g., the Dow Jones averages), a sinusoidal voltage source (the AC voltage outlets), a sound wave being produced when you pluck a guitar string, 
+         your heart rate (plotted on an electrocardiogram), temperature in a room throughout the day, and more. </font></font></p>
+         <p align="justify">     <font size="3"><font face="Arial">In the real world, signals are not always regular and periodic like a sine or cosine wave for example. They can be 
+         very complicated, aperiodic and irregular (think of an electrocardiogram). Below is a sine wave that could represent a voltage source to a circuit. Click to change to a non-periodic signal:<font></font></p>
+         <p><center><iframe style="border: 0px;" src="chartGraph.html" width="502px" height="202px" scrolling="no"></iframe></center></p>
+         <p><br>Here are some questions we can answer with Signals and Systems: 
+         <ul>
+         <li><b>Analyze Signals:</b> What information is in this signal? Is there some
+         unexpected signal content (corruption or noise)? Could there be
+         hidden information in this signal?</li>
+         <li><b>Design Systems:</b> How do i design this circuit to do what I want?
+         Can I be confident that it will produce the expected or desired
+         output before construction, i.e. has or meets some performance
+         criteria?</li>
+         <li><b>Filter Signals:</b> Can I remove some information I am interested in
+         (decode)? Can I reduce the impact of corruption or noise? Can I
+         add information to the signal (encode)?</li>
+         <li><b>Control:</b> Can I make sure this mechanical system, perhaps part of
+         a robot, performs within some bounds of stability?</li>
+         <li><b>Modeling:</b> Can I model some real system (ecological, biological,
+         physical) as a linear system so as to study its behavior and possibly
+         control it?</li>
+         </ul>
+         </p>
+		 <br>
+         <a name="Sinusoidal Signals"></a>
+         <p align="center"><b><font face="Arial" size="5">Sinusoidal Signals</font></b>
+         </p>
+         <p align="justify">     <font size="3"><font face="Arial">Periodic signals are those signals that repeat in time with a certain period. Sinusoidal signals are very important because (as we will see below) they can be used to represent any periodic signal.
+         Sinusoidal signals have 3 parameters: amplitude, frequency and phase. The amplitude determines the highest value the signal reaches. The frequency determines how often a signal goes through a cycle (repeats). The phase of a signal determines where the signal starts
+         compared to its "parent function". For example, determine the amplitude, frequency and phase of the following signal which is a function of time:</p>
+         $$x(t) = 3sin(4\pi t+30 \,^{\circ}) $$
+         <p><form METHOD=POST NAME = Q2>
+         &nbsp; &nbsp;
+         <input TYPE = "text", NAME = "Input1" size="2"><input TYPE = "button" VALUE = "Amplitude" onClick="evaluateAnswer1(this.form,3);">
+         &nbsp; &nbsp; &nbsp; &nbsp; 
+         <input TYPE = "text", NAME = "Input2" size="2"><input TYPE = "button" VALUE = "Frequency" onClick="evaluateAnswer2(this.form,2);">
+         &nbsp; &nbsp; &nbsp; &nbsp; 
+         <input TYPE = "text", NAME = "Input3" size="2"><input TYPE = "button" VALUE = "Phase" onClick="evaluateAnswer3(this.form,30);">
+         &nbsp; &nbsp; &nbsp; &nbsp; (click to check answers) 
+         <p>&nbsp; <input TYPE = "text", NAME = "Answer" size="5"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+         <input TYPE = "text", NAME = "Answer2" size="5"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+         <input TYPE = "text", NAME = "Answer3" size="5"></form></p></p> <br>
+         <p>To visualize signals better and understand how the parameters mentioned above shape the signal, let's try the following example. Manipulate the frequency and amplitude of the sine wave to see what happens to it:</p>			
+         </font></font>
+         <p><iframe style="border: 0px;" src="sineWave.html" width="800px" height="350px" scrolling="no"></iframe></p>
+         <a name="Signal Transformations"></a>
+         <p align="center"><b><font face="Arial" size="5">Signal Transformations</font></b></p>
+         <p align="justify"><font size="3"> As you see in the above example, changing the signal's frequency or amplitude changes it's behaviour and shape. We can say the signal has been "transformed" from a primitive (sine) signal to 
+         a more complex one. The main transformations of time that we can perform on signals are: <br>
+         <ul>
+         <li><b>Time Shifting:</b> 
+         $$x(t) \rightarrow x(t-\tau)  \hspace{1 pc} \begin{Bmatrix}
+         \tau > 0, \hspace{1 pt} delay& \\
+         \tau < 0, \hspace{1 pt} advance&
+         \end{Bmatrix}$$</li>
+         </ul>	
+         <p> For example, let's say: $$x(t) = cos(t - \tau)$$ 
+         How will changing Tau affect x(t)? Change Tau below to see the effect:</p>		 
+         <p align="center"><iframe style="border: 0px;" src="timeShift.html" width="800px" height="250px" scrolling="no"></iframe></p>		 
+         <ul>
+         <li><b>Time Scaling:</b> 
+         $$x(t) \rightarrow x(\frac{t}{\tau})$$  </li>
+         </ul>
+         <p>For positive values of Tau, increasing Tau expands the signal in time. For negative Tau, the signal time-reverses and decreasing Tau expands the signal in time. 
+         The above example where you could change the frequency gives you an idea of the effect in this case. However, below is an example of time reversal that happens when Tao becomes negative:</p>
+         $$\tau = 1 \Rightarrow x(t) = at^3+bt^2+ct+d $$
+         $$ \tau = -1 \Rightarrow x(-t) = a(-t)^3+b(-t)^2+c(-t)+d $$
+         <p><center><iframe style="border: 0px;" src="timeScaling.html" width="502px" height="202px" scrolling="no"></iframe></center></p>
+         </p>		 
+         <br>
+         <a name="Signal Energy"></a>
+         <p align="center"><b><font face="Arial" size="5">Signal Energy</font></b></p>
+         <p align="justify"><font size="3"> Signals, as you saw above, can have positive or negative values for different time intervals. If we considered a signal's area as a positive measure of its size, 
+         because it takes into account both the amplitude and duration of the signal, we will soon run into a problem. The positive and negative areas could cancel each other and result in an inaccurate size.
+         This difficulty can be corrected by defining the signal size as the area under x<sup>2</sup>(t), which is always positive. We call this measure the signal energy E<sub>x</sub>:
+         $$E_{x} = \int_{-\infty}^{\infty}|x(t)|^{2}dt$$
+         <p>
+         Let's take for example a simple signal such as <b>x(t) = sin(t)</b> from <b>0</b> to <b>t</b>. To find its Energy, we first need to square the signal to get <b>x<sup>2</sup>(t) = sin<sup>2</sup>(t)</b>.
+         Below is a graphical representation of this squared signal <b>sin<sup>2</sup>(t)</b>. Hover over the graph to see the area from <b>0</b> to that point which will indicate the energy. Notice how the energy
+         increases as <b>t</b> increases:
+         </p>
+         </p>
+         <p align="center">
+         <div align = "center" id="content">
+         <div align = "center" class="demo-container">
+         <div align="center" id="placeholder" class="demo-placeholder"></div>
+         </div>	
+         <div id="footer"><font size="1">
+         Copyright &copy; IOLA and Ole Laursen </font>
+         </div>
+         </div>	
+         </p>
+         <br>
+         <p>
+         <a name="Fourier Series"></a>
+         <p align="center"><b><font face="Arial" size="5">Fourier Series</font></b></p>
+         <p align="justify"><font size="3"> A Fourier series is a way to represent a wave-like function as the sum of simple sine waves. More formally, 
+         it decomposes any periodic function or periodic signal into the sum of a (possibly infinite) set of simple oscillating functions, namely sines and cosines (or, equivalently, complex 
+         exponentials). <br><br>
+         Let's consider a signal x(t) made up of sines and cosines of frequency &omega;<sub>0</sub>(the fundamental frequency) and all of its harmonics (including the zeroth harmonic; i.e., dc) with arbitrary amplitudes:
+         $$x(t) = a_{0} + \sum_{n=1}^{\infty}a_ncos(n\omega_0t)+b_nsin(n\omega_0t)$$
+         The infinite series on the right-hand side is known as the trigonometric Fourier series of a periodic signal x(t). All we need to do to find the Fourier Series of a periodic signal is to compute the coefficients
+         a<sub>0</sub>, a<sub>n</sub> and b<sub>n</sub>. The more terms we use, the better the approximation. Here are the formulas for a<sub>0</sub>, a<sub>n</sub> and b<sub>n</sub>:
+         $$a_0 = \frac{1}{T_0}\int_{T_0} x(t)dt  \hspace{1 in} T_0 = \frac{2\pi}{\omega_0}$$
+         $$a_n = \frac{2}{T_0}\int_{T_0} x(t)cos(n\omega_0t)dt  \hspace{1 in} b_n = \frac{2}{T_0}\int_{T_0} x(t)sin(n\omega_0t)dt  $$
+         <br> For example, let's consider the square wave defined as:
+         $$x(t+2\pi) = x(t) = \left\{\begin{matrix}
+         0 \hspace{1 cm} -\pi \leq t < 0 & \\  
+         1 \hspace{1 cm} 0 \leq t < \pi & 
+         \end{matrix}\right.$$	
+         <p align="center">
+         <img src="square_Stewart.png" align="center" height="150" width="500">
+         </p>
+         <p align="center"><font size="1">
+         Image from: http://www.stewartcalculus.com/
+         </p>
+         </font>
+         </p>
+         <p>
+         Then we can easily calculate a<sub>0</sub>, a<sub>n</sub> and b<sub>n</sub> by using the formulas above:
+         $$a_0 = \frac{1}{2\pi}\int_{-\pi}^{\pi}x(t)dt= \frac{1}{2}  \hspace{0.8 in} a_n = \frac{1}{\pi}\int_{-\pi}^{\pi}x(t)cos(nt)dt= \frac{1}{n\pi}[sin(n\pi)-sin(0)]=0$$
+         $$b_n = \frac{1}{\pi}\int_{-\pi}^{\pi}x(t)sin(nt)dt=\frac{1}{\pi}\int_{-\pi}^{0}0\,dt + \frac{1}{\pi}\int_{0}^{\pi}sin(t)\,dt = \left\{\begin{matrix}
+         0 \hspace{1 cm} if \,\,n \,\,is\,\,even& \\ 
+         \frac{2}{n\pi} \hspace{1 cm} if \,\,n \,\,is\,\,odd& 
+         \end{matrix}\right.$$
+         </p>
+         <br>
+         <p> Approximating a <b>Square Wave</b> using a Fourier Series: </p>
+         <p>
+         Using the same method as in the exercise above, we can derive this formula to approximate a square wave:
+         $$x_{square}(t) = \frac{4}{\pi} \sum_{k=1}^{\infty} (-1)^k \frac{sin(2\pi(2k-1)ft)}{2k-1}$$
+         To give a better idea of how the Fourier Series works visually, consider the following example (note: this square wave oscillates about the x-axis):
+         </p>
+         <p><iframe style="border: 0px;" src="squareWave.html" width="600px" height="300px" scrolling="no"></iframe></p>
+         <p> Approximating a <b>Triangle Wave</b> using a Fourier Series: 
+         Here is the formula for approximating a triangle wave. This formula can be derived using the above exercise.</p>
+         $$x_{triangle}(t) = \frac{8}{\pi^2} \sum_{k=0}^{\infty} (-1)^k \frac{sin(2\pi(2k+1)ft)}{(2k+1)^2}$$
+         <p><iframe style="border: 0px;" src="triangleWave.html" width="600px" height="300px" scrolling="no"></iframe></p>
+         <p> Approximating a <b>Sawtooth Wave</b> using a Fourier Series: 
+         Here is the formula for approximating a sawtooth wave:</p>
+         $$x_{sawtooth}(t) = \frac{2}{\pi} \sum_{k=1}^{\infty} (-1)^k \frac{sin(2\pi kft)}{k}$$
+         <p><iframe style="border: 0px;" src="sawTooth.html" width="600px" height="300px" scrolling="no"></iframe></p>
+         </p>
+         <a name="Signal Sampling"></a>
+         <p align="center"><b><font face="Arial" size="5">Signal Sampling</font></b></p>
+         <p>
+         <div align="center">
+         <center>
+         <table border="0" cellpadding="0" cellspacing="5" width="650" height="400">
+         <tr>
+         <td width="232" height="184" valign="top" align="center" ><img src="3sine.jpg" align="center" height="220" width="500"></td>
+         <td width="232" height="184" valign="top" align="left" bgcolor="#FFFFFF">This is as input signal from a voltage source. 
+         In this case the input is a sine wave with an amplitude of 3 and a period of 2 &#960. This is an example of a continuous time signal. </td>
+         </tr>
+         <tr>
+         <td width="232" height="180" valign="top" align="center" bgcolor="#FFFFFF"><img src="discreteSine.jpg" align="center" height="220" width="500"></td>
+         <td width="232" height="180" valign="top" align="left" bgcolor="#FFFFFF">This is the same input signal now plotted as a discrete set of data points. 
+         Only 50 points of the signal are plotted here. Note that the x-axis is not time in seconds anymore but it is the number of data points plotted.</td>
+         </tr>
+         </table>
+         <p align="justify">
+         Here is an example of a sine wave sampled every 0.5 seconds. It is clear that as the sampling frequency goes to infinity, we get an exact reconstruction of our original sine wave.</p>
+         <p align="center">
+         <div align = "center" id="content">
+         <div align = "center" class="demo-container">
+         <div align="center" id="placeholder2" class="demo-placeholder"></div>
+         </div>	
+         <div id="footer2"><font size="1">
+         Copyright &copy; IOLA and Ole Laursen </font>
+         </div>
+         </div>	
+         </p>
+         <br>
+         <a name="References"></a>
+         <p align="center"><b><font face="Arial" size="5">References</font></b></p>
+         <p align="left">
+         <ul>
+         <li align = "left">This site template was provided for free by:  <a href="http://www.free-templates.org"> www.free-templates.org</a></li>
+         <li align = "left">In order to do the scripts on this site, I heavily referred to Jack Schaedler's work on the topic:  <a href="https://github.com/jackschaedler"> https://github.com/jackschaedler</a></li>
+         <li align = "left">Some animations were also done by referring to Jerome Cukier's work at:  <a href="http://blog.visual.ly/creating-animations-and-transitions-with-d3-js/"> http://blog.visual.ly/creating-animations-and-transitions-with-d3-js/</a></li>
+         <li align = "left">The main part of the theory was based on the book "Linear Systems and Signals, 2nd Edition" by B.P. Lathi</li>
+         <li align = "left">Some images and concepts were taken from: <a href="http://www.stewartcalculus.com"> http://www.stewartcalculus.com</a></li>
+         <li align = "left">Various examples and references were also taken from: <a href="http://en.wikipedia.org/wiki/Signal_(electrical_engineering)"> http://en.wikipedia.org/wiki/Signal_(electrical_engineering)</a></li>
+         <li align = "left">All of the scripts were created using the <a href="http://d3js.org/"> D3.js</a> and <a href="http://www.flotcharts.org/">Flot</a> JavaScript libraries</li>
+         <li align = "left">Math rendering throughout the site was done using <a href="http://www.mathjax.org/"> MathJax</a></li>
+		 <li align = "left"><a href="http://www.mathworks.com/products/matlab/">MATLAB</a> was used to do the sampling plots</li>
+         </ul>
+         </p>
+         <br>
+         </center>
+         </div>
+         <br>
+         <br>
+         </td>
+         <center>
+         </tr>
+         <tr>
+         <td width="759" height="4" colspan="3" bgcolor="#EFA541">
+         <p align="center"><b></b></td>
+         </tr>
+         <tr>        
+         <td width="759" height="4" colspan="3">         
+         </tr>
+         </table>
+         </center>
+      </div>
+   </body>
+</html>

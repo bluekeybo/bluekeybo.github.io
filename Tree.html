@@ -1,0 +1,332 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8" />
+  <title>d3tree</title>
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+  Remove this if you use the .htaccess -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+  <script type="text/javascript"
+  src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+   google.load("jquery", "1");
+   google.setOnLoadCallback(function() {
+    doTheTreeViz("#chart", mcpherTreeData);
+   });
+  </script>
+
+  <script type="text/javascript"
+  src="http://d3js.org/d3.v2.min.js?2.9.1"></script><style>
+html {
+  min-width: 1040px;
+}
+
+body {
+  position: relative;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  margin: 1em auto 4em auto;
+  width: 960px;
+}
+
+h1 {
+  font-size: 64px;
+  font-weight: 300;
+  letter-spacing: -2px;
+  margin: .3em 0 .1em 0;
+}
+
+h2 {
+  margin-top: 2em;
+}
+
+h1, h2 {
+  text-rendering: optimizeLegibility;
+}
+
+h2 a {
+  color: #ccc;
+  left: -20px;
+  position: absolute;
+  width: 740px;
+}
+
+footer {
+  font-size: small;
+  margin-top: 8em;
+}
+
+header aside {
+  margin-top: 82px;
+}
+
+header aside,
+footer aside {
+  color: #636363;
+  text-align: right;
+}
+
+aside {
+  font-size: small;
+  left: 780px;
+  position: absolute;
+  width: 180px;
+}
+
+.attribution {
+  font-size: small;
+  margin-bottom: 2em;
+}
+
+body > p, li > p {
+  line-height: 1.5em;
+}
+
+body > p {
+  width: 720px;
+}
+
+body > blockquote {
+  width: 640px;
+}
+
+li {
+  width: 680px;
+}
+
+
+
+pre, code, textarea {
+  font-family: "Menlo", monospace;
+}
+
+code {
+  line-height: 1em;
+}
+
+textarea {
+  font-size: 100%;
+}
+
+body > pre {
+  border-left: solid 2px #ccc;
+  padding-left: 18px;
+  margin: 2em 0 2em -20px;
+}
+
+.html .value,
+.javascript .string,
+.javascript .regexp {
+  color: #756bb1;
+}
+
+.html .tag,
+.css .tag,
+.javascript .keyword {
+  color: #3182bd;
+}
+
+.comment {
+  color: #636363;
+}
+
+.html .doctype,
+.javascript .number {
+  color: #31a354;
+}
+
+.html .attribute,
+.css .attribute,
+.javascript .class,
+.javascript .special {
+  color: #e6550d;
+}
+
+svg {
+  font: 10px sans-serif;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+sup, sub {
+  line-height: 0;
+}
+
+q:before,
+blockquote:before {
+  content: "�";
+}
+
+q:after,
+blockquote:after {
+  content: "�";
+}
+
+blockquote:before {
+  position: absolute;
+  left: 2em;
+}
+
+blockquote:after {
+  position: absolute;
+}
+
+</style><style>
+  #chart {
+  height: 440px;
+ }
+ .node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+ }
+ .node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+ }
+ .link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+ }
+ .link:hover {
+  stroke-opacity: .5;
+ }
+
+
+circle.node-dot {
+    fill: DarkSlateGray;
+    stroke: SlateGray;
+    stroke-width: 1px;
+}
+
+path.link {
+    fill: none;
+    stroke: gray;
+}
+</style>
+  <script>
+   // --- d3tree.js
+   /**
+    * @author bruce mcpherson
+    */
+   /**
+    * Traverse data tree and perform function on item and its children
+    * @param {object} parent top of branch
+    * @param {function} fWhat what to do with it
+    * @param {function} fGetChildren how to get its children
+    */
+   function traverse(parent, fWhat, fGetChildren) {
+    if (parent) {
+     fWhat(parent);
+     var children = fGetChildren(parent);
+     if (children) {
+      for (var i = 0; i < children.length; i++) {
+       traverse(children[i], fWhat, fGetChildren);
+      }
+     }
+    }
+   }
+
+   /**
+    * do the tree vizualization
+    * @param {string} divName name of the div to hold the tree
+    * @param {object} data the source data
+    */
+   function doTheTreeViz(divName, data) {
+    // take a look at the data
+    var treeDimensions = walkTheTree(data.data);
+    // tweak the options
+    var options = $.extend({
+     stackHeight : 12,
+     radius : 5,
+     fontSize : 12,
+     width : $(divName).outerWidth(),
+     gap : 1.5
+    }, data.options);
+
+    options.gap = options.gap * options.radius;
+
+    var height = treeDimensions.nodeCount * options.stackHeight;
+    var width = options.width - 2 * treeDimensions.labelLength * options.fontSize;
+    // layout the tree
+    var tree = d3.layout.tree().sort(null).size([height, width]).children(function(item) {
+     return item.children ? (item.children.length ? item.children : null ) : null;
+    });
+
+    // create the nodes and links
+    var nodes = tree.nodes(treeDimensions.data);
+    var links = tree.links(nodes);
+
+    // render
+    var root = d3.select(divName).append("svg:svg").attr("width", options.width).attr("height", height).append("svg:g").attr("class", divName).attr("transform", "translate(" + treeDimensions.labelLength + ",0)");
+
+    var link = d3.svg.diagonal().projection(function(d) {
+     return [d.y, d.x];
+    });
+
+    root.selectAll("path.link").data(links).enter().append("svg:path").attr("class", "link").attr("d", link);
+
+    var group = root.selectAll("g.node").data(nodes).enter().append("svg:g").attr("class", "node").attr("transform", function(d) {
+     return "translate(" + d.y + "," + d.x + ")";
+    });
+
+    group.append("svg:circle").attr("class", "node-dot").attr("r", options.radius);
+
+    group.append("svg:text").attr("text-anchor", function(d) {
+     return d.children ? "end" : "start";
+    }).attr("dx", function(d) {
+     return d.children ? -options.gap : options.gap;
+    }).attr("dy", ".35em").text(function(d) {
+     return d.label;
+    });
+
+   }
+
+   /**
+    * walk the tree and get dimensions
+    * @param {object} data the source data
+    * @return {object} dimensions of the data
+    */
+   function walkTheTree(data) {
+    var dimensions = {
+     nodeCount : 0,
+     labelLength : 0,
+     data : null
+    };
+    dimensions.data = data;
+    traverse(dimensions.data, function(item) {
+     dimensions.nodeCount++;
+     if (item.label.length > dimensions.labelLength)
+      dimensions.labelLength = item.label.length;
+    }, function(item) {
+     return item.children ? (item.children.length ? item.children : null ) : null;
+    });
+    return dimensions;
+   }
+  </script><script> var mcpherTreeData = {"options":{"radius":"7.2","stackHeight":"15","fontSize":"12","gap":"1.8","root":"d3"},"data":{"label":"Hello","children":[{"label":"BedRock","children":[{"label":"Flintstones","children":[{"label":"Fred"},{"label":"Wilma",},{"label":"Children"},{"label":"Pets"} ]},{"label":"Rubbles","children":[{"label":"Barney"},{"label":"Betty"},{"label":"Children"},{"label":"Pets"} ]},{"label":"Aliens","children":[{"label":"The Great Gazoo"} ]} ]} ]}};</script></head><body><div><h3></h3><aside>
+ 
+   </aside>
+   <br>
+  </div>
+  <div id="chart">
+
+  </div>
+  <footer>
+   <aside>
+   <small> works best on Chrome <br />acknowledgements</small>
+ 
+    <a href="http://d3js.org/"><small>d3.js</small></a>
+    <a href="http://blog.pixelingene.com/2011/07/building-a-tree-diagram-in-d3-js/"><small>pavan</small></a>
+   </aside>
+
+  </footer>
+ </body>
+</html>
+
+
